@@ -1,5 +1,11 @@
 {
   "always_excluded": [
+    "Beginn Theorie 6. Semester",
+    "Bildverarbeitung (aus CG und BV)",
+    "Bildverarbeitung (aus KI und BV)",
+    "Grundlagen KI (aus KI und BV)",
+    "Grundlagen KI (aus KI und IS)",
+    "Grundlagen der Finiten Elemente",
     "High Performance Computing",
     "Recht"
   ],

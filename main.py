@@ -97,6 +97,18 @@ def get_modules():
     """API-Endpoint: Gibt alle verfügbaren Module und deren Status zurück."""
     # Aktuelle Regeln laden
     current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
+    
+    # Debug: Anzahl der Module loggen
+    all_modules = set()
+    for event in current_rules.get('always_excluded', []):
+        all_modules.add(event)
+    for rule in current_rules.get('time_based_exclusions', []):
+        for event in rule.get('events', []):
+            all_modules.add(event)
+    
+    print(f"[DEBUG] Total modules: {len(all_modules)}")
+    print(f"[DEBUG] Always excluded: {len(current_rules.get('always_excluded', []))}")
+    
     return jsonify(current_rules)
 
 

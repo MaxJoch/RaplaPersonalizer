@@ -67,13 +67,18 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
         const checkboxes = document.querySelectorAll('.module-item input[type="checkbox"]');
         const excludedModules = [];
         
+        console.log('Total checkboxes found:', checkboxes.length);
+        
         checkboxes.forEach(checkbox => {
             const module = checkbox.dataset.module;
             // ANGEKREUZTE Module werden ausgeblendet
             if (checkbox.checked) {
                 excludedModules.push(module);
+                console.log('Excluded:', module);
             }
         });
+        
+        console.log('Sending excluded modules:', excludedModules);
         
         // An Server senden
         const response = await fetch('/api/save-preferences', {
@@ -86,9 +91,12 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
             })
         });
         
+        console.log('Response status:', response.status);
+        const data = await response.json();
+        console.log('Response data:', data);
+        
         if (!response.ok) throw new Error('Speichern fehlgeschlagen');
         
-        const data = await response.json();
         showToast('✅ Einstellungen erfolgreich gespeichert!');
         
         // Module neu laden
@@ -96,7 +104,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
         
     } catch (error) {
         console.error('Fehler beim Speichern:', error);
-        showToast('Fehler beim Speichern der Einstellungen', 'error');
+        showToast('Fehler beim Speichern der Einstellungen: ' + error.message, 'error');
     }
 });
 
