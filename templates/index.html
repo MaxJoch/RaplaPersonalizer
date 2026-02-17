@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAPLA DHBW Personalizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🎓 RAPLA DHBW Personalizer</h1>
+                <p>Personalisiere deinen Stundenplan nach deinen Wünschen</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="grid">
+                <!-- Linke Seite: Konfiguration -->
+                <section class="config-section">
+                    <h2>⚙️ Deine Module</h2>
+                    <div class="module-list" id="moduleList">
+                        <div class="loading">Lädt Module...</div>
+                    </div>
+                    <button class="btn btn-save" id="saveBtn">💾 Einstellungen speichern</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 Zurücksetzen</button>
+                </section>
+
+                <!-- Rechte Seite: Download & Anleitung -->
+                <section class="download-section">
+                    <h2>📥 Kalender herunterladen</h2>
+                    
+                    <div class="download-card">
+                        <h3>Direkt-Download</h3>
+                        <p>Die .ics-Datei deines personalisierten Stundenplans:</p>
+                        <a href="/download-ics" class="btn btn-download">📅 ICS-Datei herunterladen</a>
+                    </div>
+
+                    <div class="download-card">
+                        <h3>Zu Kalender-App hinzufügen</h3>
+                        <p>Abonniere deinen Stundenplan automatisch:</p>
+                        <div class="url-box">
+                            <input type="text" id="urlInput" readonly>
+                            <button class="btn btn-copy" onclick="copyToClipboard()">📋 Kopieren</button>
+                        </div>
+                        <p class="small-text">Diese URL kannst du in Google Calendar, Outlook, Apple Calendar oder anderen Kalender-Apps abonnieren.</p>
+                    </div>
+
+                    <div class="download-card faq">
+                        <h3>❓ Wie funktionierts?</h3>
+                        <ol>
+                            <li><strong>Wähle deine Module:</strong> Aktiviere/Deaktiviere die Module, die du sehen möchtest</li>
+                            <li><strong>Speichern:</strong> Klicke auf "Einstellungen speichern"</li>
+                            <li><strong>Herunterladen:</strong> Download die .ics-Datei oder verwende die Abonnement-URL</li>
+                            <li><strong>Importieren:</strong> Importiere die Datei in deine Kalender-App oder abonniere die URL</li>
+                        </ol>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>RAPLA DHBW Personalizer • Filtern und Personalisieren deines Stundenplans</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifikation -->
+    <div id="toast" class="toast"></div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

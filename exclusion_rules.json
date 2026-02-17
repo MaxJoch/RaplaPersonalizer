@@ -1,21 +1,13 @@
 {
-  "always_excluded": ["Hl. 3 Könige",
-    "Allerheiligen",
-    "Faschingsdienstag",
-    "Klausurwoche",
-    "Karfreitag",
-    "Ostermontag",
-    "Tag der Arbeit",
-    "Christi Himmelfahrt",
-    "Pfingstmontag",
-    "Fronleichnam",
-    "Tag der deutschen Einheit",
-    "Allerheiligen"],
+  "always_excluded": [
+    "High Performance Computing",
+    "Recht"
+  ],
   "time_based_exclusions": [
     {
-      "description": "Exclude these events from February 16, 2026 to May 17, 2026",
-      "start_date": "2026-02-16",
-      "end_date": "2026-05-17",
+      "description": "Dies ist nur für die Modul-Liste. Die Zeit-Filterung ist deaktiviert.",
+      "start_date": "2025-01-01",
+      "end_date": "2099-12-31",
       "events": [
         "Beginn Theorie 6. Semester",
         "Recht",
@@ -46,7 +38,18 @@
         "Klausur Computergraphik und Bildverarbeitung  (120 min)",
         "Klausur Forensik (60 min)",
         "Vorstellung SARB im Plenum",
-        "Einführung in RUST"
+        "Einführung in RUST",
+        "Hl. 3 Könige",
+        "Allerheiligen",
+        "Faschingsdienstag",
+        "Klausurwoche",
+        "Karfreitag",
+        "Ostermontag",
+        "Tag der Arbeit",
+        "Christi Himmelfahrt",
+        "Pfingstmontag",
+        "Fronleichnam",
+        "Tag der deutschen Einheit"
       ]
     }
   ]

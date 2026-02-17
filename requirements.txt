@@ -2,3 +2,4 @@ Flask
 icalendar
 requests
 gunicorn
+Jinja2
