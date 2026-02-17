@@ -1,0 +1,53 @@
+{
+  "always_excluded": ["Hl. 3 Könige",
+    "Allerheiligen",
+    "Faschingsdienstag",
+    "Klausurwoche",
+    "Karfreitag",
+    "Ostermontag",
+    "Tag der Arbeit",
+    "Christi Himmelfahrt",
+    "Pfingstmontag",
+    "Fronleichnam",
+    "Tag der deutschen Einheit",
+    "Allerheiligen"],
+  "time_based_exclusions": [
+    {
+      "description": "Exclude these events from February 16, 2026 to May 17, 2026",
+      "start_date": "2026-02-16",
+      "end_date": "2026-05-17",
+      "events": [
+        "Beginn Theorie 6. Semester",
+        "Recht",
+        "e Business (eB&PJM)",
+        "Bildverarbeitung (aus CG und BV)",
+        "Grundlagen KI (aus KI und BV)",
+        "Grundlagen KI (aus KI und IS)",
+        "angewandtes Projektmanagement (eB&PJM)",
+        "Computergrafik (aus CG und BV)",
+        "Bildverarbeitung (aus KI und BV)",
+        "Interaktive Syseteme (aus KI und IS)",
+        "Games und Gaming",
+        "Management von IT-Infrastrukturen",
+        "Psychologische Grundlagen für Informatiker (W)",
+        "Forensik",
+        "Grundlagen der Finiten Elemente",
+        "Digitale Audiosignalverarbeitung",
+        "High Performance Computing",
+        "Kolloquium TINF23 Nachtermin  ( min)",
+        "Klausur WahlUnit  (90 min)",
+        "Klausur Finite Elemente  (60 min)",
+        "Klausur Erklärebare KI  (60 min)",
+        "Klausur Digitale Augiosignalverarbeitung  (60 min)",
+        "Klausurwoche 6. Semester",
+        "Klausur Grundlagen KI und  Interaktive Systeme  (120 min)",
+        "Klausur im Wahlmodul 2aus6  (120 min)",
+        "Klausur Grundlagen KI und Bildverarbeitung  (120 min)",
+        "Klausur Computergraphik und Bildverarbeitung  (120 min)",
+        "Klausur Forensik (60 min)",
+        "Vorstellung SARB im Plenum",
+        "Einführung in RUST"
+      ]
+    }
+  ]
+}
