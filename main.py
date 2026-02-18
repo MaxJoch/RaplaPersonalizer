@@ -1,6 +1,6 @@
 from pathlib import Path
 import json
-import re
+import os
 from datetime import datetime
 
 from flask import Flask, Response, render_template, jsonify, request
@@ -18,6 +18,12 @@ ICAL_URL = "https://rapla.dhbw-karlsruhe.de/rapla?page=iCal&user=li&file=TINF23B
 
 # The exclusion rules now live in a JSON file for more flexibility
 EXCLUSION_RULES_FILE = Path(__file__).with_name("exclusion_rules.json")
+
+# Vercel KV (Upstash) REST API configuration
+KV_REST_API_URL = os.getenv("KV_REST_API_URL")
+KV_REST_API_TOKEN = os.getenv("KV_REST_API_TOKEN")
+KV_KEY = "exclusion_rules"
+KV_ENABLED = bool(KV_REST_API_URL and KV_REST_API_TOKEN)
 
 # ============================================================================
 # Rapla Calendar Filtering (Time-Based Event Exclusions)
@@ -45,7 +51,47 @@ def load_exclusion_rules(file_path: Path) -> dict:
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-EXCLUSION_RULES = load_exclusion_rules(EXCLUSION_RULES_FILE)
+def load_rules() -> dict:
+    """Load rules from file and overlay KV-stored exclusions if available."""
+    rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
+
+    if KV_ENABLED:
+        try:
+            response = requests.get(
+                f"{KV_REST_API_URL}/get/{KV_KEY}",
+                headers={"Authorization": f"Bearer {KV_REST_API_TOKEN}"},
+                timeout=5,
+            )
+            response.raise_for_status()
+            result = response.json().get("result")
+            if result:
+                excluded = json.loads(result)
+                if isinstance(excluded, list):
+                    rules["always_excluded"] = excluded
+        except Exception:
+            # Fall back to file-based rules if KV is unavailable
+            pass
+
+    return rules
+
+
+def save_exclusions(excluded_modules: list) -> None:
+    """Save exclusions to KV when configured; otherwise write to file."""
+    if KV_ENABLED:
+        payload = json.dumps(excluded_modules, ensure_ascii=False)
+        response = requests.post(
+            f"{KV_REST_API_URL}/set/{KV_KEY}",
+            headers={"Authorization": f"Bearer {KV_REST_API_TOKEN}"},
+            data=payload,
+            timeout=5,
+        )
+        response.raise_for_status()
+        return
+
+    current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
+    current_rules["always_excluded"] = excluded_modules
+    with open(EXCLUSION_RULES_FILE, "w", encoding="utf-8") as f:
+        json.dump(current_rules, f, ensure_ascii=False, indent=2)
 
 
 def get_event_date(event):
@@ -70,7 +116,7 @@ def should_keep(event, rules=None) -> bool:
         True if event should be kept, False if it should be excluded.
     """
     if rules is None:
-        rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
+        rules = load_rules()
     
     summary = str(event.get('summary', '')).strip().lower()
     
@@ -96,19 +142,7 @@ def index():
 def get_modules():
     """API-Endpoint: Gibt alle verfügbaren Module und deren Status zurück."""
     # Aktuelle Regeln laden
-    current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
-    
-    # Debug: Anzahl der Module loggen
-    all_modules = set()
-    for event in current_rules.get('always_excluded', []):
-        all_modules.add(event)
-    for rule in current_rules.get('time_based_exclusions', []):
-        for event in rule.get('events', []):
-            all_modules.add(event)
-    
-    print(f"[DEBUG] Total modules: {len(all_modules)}")
-    print(f"[DEBUG] Always excluded: {len(current_rules.get('always_excluded', []))}")
-    
+    current_rules = load_rules()
     return jsonify(current_rules)
 
 
@@ -118,19 +152,13 @@ def save_preferences():
     data = request.get_json()
     excluded_modules = data.get('excluded_modules', [])
     
-    # Aktuelle Regeln laden
-    current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
-    
-    # Always excluded mit neuen Werten aktualisieren
-    current_rules['always_excluded'] = excluded_modules
-    
-    # Speichern
-    with open(EXCLUSION_RULES_FILE, 'w', encoding='utf-8') as f:
-        json.dump(current_rules, f, ensure_ascii=False, indent=2)
-    
-    # Globale Regeln aktualisieren
-    global EXCLUSION_RULES
-    EXCLUSION_RULES = current_rules
+    try:
+        save_exclusions(excluded_modules)
+    except Exception:
+        return jsonify({
+            'success': False,
+            'message': 'Speichern fehlgeschlagen'
+        }), 500
     
     return jsonify({
         'success': True,
@@ -142,7 +170,7 @@ def save_preferences():
 def download_ics():
     """Download: Gefilterte ICS-Datei herunterladen."""
     # Aktuelle Regeln laden
-    current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
+    current_rules = load_rules()
     
     r = requests.get(ICAL_URL, timeout=15, headers={"User-Agent": "vital/1.0"})
     cal = Calendar.from_ical(r.text)
@@ -166,7 +194,7 @@ def download_ics():
 def filtered_ics():
     """Rapla calendar with time-based event filtering."""
     # Aktuelle Regeln laden
-    current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
+    current_rules = load_rules()
     
     r = requests.get(ICAL_URL, timeout=15, headers={"User-Agent":"vital/1.0"})
     cal = Calendar.from_ical(r.text)
