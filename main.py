@@ -98,6 +98,35 @@ def save_exclusions(excluded_modules: list) -> None:
         json.dump(current_rules, f, ensure_ascii=False, indent=2)
 
 
+def save_rules(rules: dict) -> None:
+    """Save complete rules (including time_based_exclusions) to file."""
+    with open(EXCLUSION_RULES_FILE, "w", encoding="utf-8") as f:
+        json.dump(rules, f, ensure_ascii=False, indent=2)
+
+
+def fetch_modules_from_rapla() -> list:
+    """Fetch all modules from RAPLA and extract unique event summaries.
+    
+    Returns:
+        List of unique module names found in the calendar.
+    """
+    try:
+        r = requests.get(ICAL_URL, timeout=15, headers={"User-Agent": "vital/1.0"})
+        r.raise_for_status()
+        cal = Calendar.from_ical(r.text)
+        
+        modules = set()
+        for component in cal.walk():
+            if component.name == "VEVENT":
+                summary = str(component.get('summary', '')).strip()
+                if summary:
+                    modules.add(summary)
+        
+        return sorted(list(modules))
+    except Exception as e:
+        raise RuntimeError(f"Module-Fetch von RAPLA fehlgeschlagen: {e}")
+
+
 def get_event_date(event):
     """Extract the date from an event component."""
     dtstart = event.get('dtstart')
@@ -168,6 +197,48 @@ def save_preferences():
         'success': True,
         'message': 'Preferenzen gespeichert'
     })
+
+
+@app.route("/api/refresh-modules", methods=['POST'])
+def refresh_modules():
+    """API-Endpoint: Aktualisiert die Modulliste von RAPLA."""
+    try:
+        # Hole alle verfügbaren Module von RAPLA
+        new_modules = fetch_modules_from_rapla()
+        
+        # Lade aktuelle Regeln (behält always_excluded bei)
+        current_rules = load_rules()
+        
+        # Initialisiere time_based_exclusions falls leer
+        if not current_rules.get('time_based_exclusions'):
+            current_rules['time_based_exclusions'] = [
+                {
+                    "description": "Dies ist nur für die Modul-Liste. Die Zeit-Filterung ist deaktiviert.",
+                    "start_date": "2025-01-01",
+                    "end_date": "2099-12-31",
+                    "events": []
+                }
+            ]
+        
+        # Merge mit bestehenden Modulen (keine Duplikate)
+        existing_modules = set(current_rules['time_based_exclusions'][0].get('events', []))
+        all_modules = sorted(list(existing_modules.union(set(new_modules))))
+        
+        current_rules['time_based_exclusions'][0]['events'] = all_modules
+        
+        # Speichere aktualisierte Regeln
+        save_rules(current_rules)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Module aktualisiert: {len(all_modules)} Module gefunden',
+            'module_count': len(all_modules)
+        })
+    except Exception as exc:
+        return jsonify({
+            'success': False,
+            'message': f'Modul-Refresh fehlgeschlagen: {exc}'
+        }), 500
 
 
 @app.route("/download-ics")

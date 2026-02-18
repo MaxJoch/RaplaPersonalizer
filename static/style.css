@@ -240,6 +240,23 @@ body {
     transform: translateY(-2px);
 }
 
+.btn-refresh {
+    background: #8b5cf6;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.btn-refresh:hover:not(:disabled) {
+    background: #7c3aed;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-refresh:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btn-download {
     background: var(--primary-color);
     color: white;

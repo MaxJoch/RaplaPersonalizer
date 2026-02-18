@@ -129,6 +129,40 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
     }
 });
 
+// Module von RAPLA aktualisieren
+document.getElementById('refreshBtn').addEventListener('click', async () => {
+    try {
+        document.getElementById('refreshBtn').disabled = true;
+        document.getElementById('refreshBtn').textContent = '⏳ Wird aktualisiert...';
+        
+        const response = await fetch('/api/refresh-modules', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const data = await response.json().catch(() => null);
+        
+        if (!response.ok) {
+            const message = data && data.message ? data.message : 'Aktualisierung fehlgeschlagen';
+            throw new Error(message);
+        }
+        
+        showToast('✅ ' + (data.message || 'Module erfolgreich aktualisiert!'));
+        
+        // Module neu laden
+        setTimeout(loadModules, 500);
+        
+    } catch (error) {
+        console.error('Fehler beim Aktualisieren:', error);
+        showToast('Fehler beim Aktualisieren der Module: ' + error.message, 'error');
+    } finally {
+        document.getElementById('refreshBtn').disabled = false;
+        document.getElementById('refreshBtn').textContent = '🔃 Module aktualisieren';
+    }
+});
+
 // Toast Notifikation anzeigen
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
