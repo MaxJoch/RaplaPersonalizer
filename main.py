@@ -81,11 +81,15 @@ def save_exclusions(excluded_modules: list) -> None:
         payload = json.dumps(excluded_modules, ensure_ascii=False)
         response = requests.post(
             f"{KV_REST_API_URL}/set/{KV_KEY}",
-            headers={"Authorization": f"Bearer {KV_REST_API_TOKEN}"},
-            data=payload,
-            timeout=5,
+            headers={
+                "Authorization": f"Bearer {KV_REST_API_TOKEN}",
+                "Content-Type": "text/plain; charset=utf-8",
+            },
+            data=payload.encode("utf-8"),
+            timeout=8,
         )
-        response.raise_for_status()
+        if not response.ok:
+            raise RuntimeError(f"KV set failed: {response.status_code} {response.text}")
         return
 
     current_rules = load_exclusion_rules(EXCLUSION_RULES_FILE)
@@ -154,10 +158,10 @@ def save_preferences():
     
     try:
         save_exclusions(excluded_modules)
-    except Exception:
+    except Exception as exc:
         return jsonify({
             'success': False,
-            'message': 'Speichern fehlgeschlagen'
+            'message': f'Speichern fehlgeschlagen: {exc}'
         }), 500
     
     return jsonify({
